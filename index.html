@@ -35,7 +35,6 @@
 </head>
 <body>
     <h2>Cheating Tic-Tac-Toe</h2>
-    <p>Try to beat the computer! (Hint: You won't)</p>
     <div class="board" id="board"></div>
     <p id="message"></p>
     <script>
@@ -43,7 +42,7 @@
         let cells = [];
         let gameState = ["", "", "", "", "", "", "", "", ""];
         let playerTurn = true;
-        let allowWinSetup = true;
+        let cheatActivated = false;
 
         function createBoard() {
             for (let i = 0; i < 9; i++) {
@@ -71,20 +70,18 @@
             let emptyIndices = gameState.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
             if (emptyIndices.length === 0) return;
             
-            let index;
-            if (allowWinSetup && countPlayerWinningMoves() === 1) {
-                allowWinSetup = false; 
-                index = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            if (!cheatActivated && countPlayerWinningMoves() === 1) {
+                cheatActivated = true;
+                let playerMoveIndex = gameState.indexOf("X");
+                gameState[playerMoveIndex] = "O"; 
+                cells[playerMoveIndex].innerText = "O"; 
+                cells[playerMoveIndex].classList.add("taken");
             } else {
-                index = detectPlayerWinMove();
-                if (index === -1) {
-                    index = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-                }
+                let index = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                gameState[index] = "O";
+                cells[index].innerText = "O";
+                cells[index].classList.add("taken");
             }
-            
-            gameState[index] = "O";
-            cells[index].innerText = "O";
-            cells[index].classList.add("taken");
             playerTurn = true;
         }
 
@@ -100,20 +97,6 @@
                 }
             }
             return count;
-        }
-
-        function detectPlayerWinMove() {
-            for (let i = 0; i < 9; i++) {
-                if (gameState[i] === "") {
-                    gameState[i] = "X";
-                    if (checkWin("X")) {
-                        gameState[i] = "O";
-                        return i;
-                    }
-                    gameState[i] = "";
-                }
-            }
-            return -1;
         }
 
         function checkWin(player) {
