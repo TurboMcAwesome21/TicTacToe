@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheating Tic-Tac-Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            margin: 20px auto;
+            width: 320px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            background-color: lightgray;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+        .cell.taken {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h2>Cheating Tic-Tac-Toe</h2>
+    <p>Try to beat the computer! (Hint: You won't)</p>
+    <div class="board" id="board"></div>
+    <p id="message"></p>
+    <script>
+        const board = document.getElementById("board");
+        let cells = [];
+        let gameState = ["", "", "", "", "", "", "", "", ""];
+        let playerTurn = true;
+        let allowWinSetup = true;
+
+        function createBoard() {
+            for (let i = 0; i < 9; i++) {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.dataset.index = i;
+                cell.addEventListener("click", playerMove);
+                board.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+
+        function playerMove(event) {
+            let index = event.target.dataset.index;
+            if (gameState[index] === "" && playerTurn) {
+                gameState[index] = "X";
+                cells[index].innerText = "X";
+                cells[index].classList.add("taken");
+                playerTurn = false;
+                setTimeout(computerMove, 500);
+            }
+        }
+
+        function computerMove() {
+            let emptyIndices = gameState.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
+            if (emptyIndices.length === 0) return;
+            
+            let index;
+            if (allowWinSetup && countPlayerWinningMoves() === 1) {
+                allowWinSetup = false; 
+                index = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            } else {
+                index = detectPlayerWinMove();
+                if (index === -1) {
+                    index = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                }
+            }
+            
+            gameState[index] = "O";
+            cells[index].innerText = "O";
+            cells[index].classList.add("taken");
+            playerTurn = true;
+        }
+
+        function countPlayerWinningMoves() {
+            let count = 0;
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === "") {
+                    gameState[i] = "X";
+                    if (checkWin("X")) {
+                        count++;
+                    }
+                    gameState[i] = "";
+                }
+            }
+            return count;
+        }
+
+        function detectPlayerWinMove() {
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === "") {
+                    gameState[i] = "X";
+                    if (checkWin("X")) {
+                        gameState[i] = "O";
+                        return i;
+                    }
+                    gameState[i] = "";
+                }
+            }
+            return -1;
+        }
+
+        function checkWin(player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return winPatterns.some(pattern =>
+                pattern.every(index => gameState[index] === player)
+            );
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
